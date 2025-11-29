@@ -7,43 +7,56 @@ name = "penguin_classifier"
 version = "0.0.1"
 description = "A platform-independent machine learning application to classify Palmer penguins, designed for non-technical field usage."
 authors = [
-  { name = "Erik Reitsam" },
+    { name = "Erik Reitsam" },
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
+requires-python = ">=3.13"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License"
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
 ]
+
 dependencies = [
-    "ipython",
-    "jupyterlab",
+    "python-dotenv",
     "loguru",
-    "matplotlib",
-    "mkdocs",
-    "notebook",
     "numpy",
     "pandas",
-    "pip",
-    "pytest",
-    "python-dotenv",
-    "ruff",
     "scikit-learn",
-    "tqdm",
-    "typer",
+    "palmerpenguins>=0.1.4,<0.2.0",
+    "dash",
+    "dash-bootstrap-components"
 ]
-requires-python = ">=3.13"
 
+[tool.poetry]
+packages = [
+    { include = "penguin_classifier", from = "src" }
+]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+ruff = "*"
+typer = "*"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "*"
+
+[tool.poetry.group.eda.dependencies]
+ipython = "*"
+jupyterlab = "*"
+notebook = "*"
+matplotlib = "*"
+tqdm = "*"
 
 [tool.ruff]
 line-length = 99
-src = ["penguin_classifier"]
-include = ["pyproject.toml", "penguin_classifier/**/*.py"]
+src = ["src"]
+include = ["pyproject.toml", "src/**/*.py"]
 
 [tool.ruff.lint]
-extend-select = ["I"]  # Add import sorting
+extend-select = ["I"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["penguin_classifier"]
 force-sort-within-sections = true
-
