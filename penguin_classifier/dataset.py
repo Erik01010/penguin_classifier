@@ -1,7 +1,8 @@
 from pathlib import Path
 
 from loguru import logger
-from tqdm import tqdm
+from palmerpenguins import load_penguins, load_penguins_raw
+import pandas as pd
 import typer
 
 from penguin_classifier.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
@@ -18,10 +19,14 @@ def main(
 ):
     # ---- REPLACE THIS WITH YOUR OWN CODE ----
     logger.info("Processing dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Processing dataset complete.")
+    raw_data = load_penguins()
+    raw_data_raw = load_penguins_raw()
+    raw_data_path = RAW_DATA_DIR / "data.csv"
+    raw_data_path_raw = RAW_DATA_DIR / "data_raw.csv"
+    raw_data.to_csv(raw_data_path)
+    raw_data_raw.to_csv(raw_data_path_raw)
+
+    logger.success("Writing dataset complete")
     # -----------------------------------------
 
 
