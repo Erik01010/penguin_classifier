@@ -1,37 +1,44 @@
 import joblib
 import pandas as pd
-from train import train_model
+import numpy as np
+from sklearn.pipeline import Pipeline
 
-from src.penguin_classifier.config import MODEL_PATH, RAW_DATA_PATH
-from src.penguin_classifier.dataset import clean_data, load_data
+from src.penguin_classifier.config import MODEL_PATH
 
 
-def predict(features: pd.DataFrame) -> list[str]:
-    """Predict with trained model."""
-    try:
-        pipeline = joblib.load(MODEL_PATH)
-    except FileNotFoundError:
-        print("No joblib file found.")
-        pipeline = train_model()
+def _load_pipeline(path: str) -> Pipeline:
+    """Load trained model pipeline from disk."""
+    return joblib.load(path)
+
+def predict_batch_species(features: pd.DataFrame, pipeline: Pipeline) -> list[str]:
+    """Predicts the species for multiple observations."""
 
     return pipeline.predict(X=features)
 
 
-def predict_proba(features: pd.DataFrame) -> pd.DataFrame:
-    """Predict probabilities with trained model."""
-    try:
-        pipeline = joblib.load(MODEL_PATH)
-    except FileNotFoundError:
-        print("No joblib file found.")
-        pipeline = train_model()
+def predict_single_penguin_proba(
+        features: pd.DataFrame,
+        pipeline: Pipeline
+) -> tuple[str, float]:
+    """Predicts species and confidence for a single penguin observation."""
 
-    predictions = pipeline.predict_proba(X=features)
-    predictions = predictions.round(4)
-    return predictions
+
+    predicted_species = pipeline.predict(X=features)[0]
+
+    all_probabilities = pipeline.predict_proba(X=features)
+    max_confidence = np.max(all_probabilities).round(4)
+
+    return predicted_species, max_confidence
 
 
 if __name__ == "__main__":
+    from src.penguin_classifier.dataset import clean_data, load_data, RAW_DATA_PATH
+
     df = load_data(RAW_DATA_PATH)
     cleaned_df = clean_data(df)
-    preds = predict_proba(features=cleaned_df.loc[1:1, :])
-    print(preds)
+    pipeline = _load_pipeline(MODEL_PATH)
+    species, proba = predict_single_penguin_proba(
+        features=cleaned_df.iloc[[0]],
+        pipeline=pipeline
+    )
+    print(f"Species: {species}, Probability: {proba}")
