@@ -24,7 +24,7 @@ A platform-independent machine learning application to classify Palmer penguins,
 │
 ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
 │                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
+│                         `1.0-jqp-initial-data-exploration`. Contains EDA.
 │
 ├── pyproject.toml     <- Project configuration file with package metadata for 
 │                         penguin_classifier and configuration for tools like black
@@ -34,26 +34,29 @@ A platform-independent machine learning application to classify Palmer penguins,
 ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
 │   └── figures        <- Generated graphics and figures to be used in reporting
 │
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── src                <- Source code for use in this project.
-    └── penguin_classifier
+└── src
+    └── penguin_classifier <- Source code for use in this project.
         │
         ├── __init__.py             <- Makes penguin_classifier a Python module
         │
         ├── config.py               <- Store useful variables and configuration
         │
+        ├── app.py               <- Entry point to the application
+        │
         ├── dataset.py              <- Scripts to download or generate data
         │
         ├── features.py             <- Code to create features for modeling
+        │
+        ├── schema.py             
         │
         ├── modeling                
         │   ├── __init__.py 
         │   ├── predict.py          <- Code to run model inference with trained models          
         │   └── train.py            <- Code to train models
+        ├── ui                
+        │   ├── __init__.py 
+        │   ├── layout.py           <- Code to define HTML-structure and wireframe          
+        │   └── callbacks.py        <- Code to connect UI and model/data
         │
         └── plots.py                <- Code to create visualizations
 ```

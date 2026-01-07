@@ -3,7 +3,7 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
-name = "penguin_classifier"
+name = "penguin-classifier"
 version = "0.0.1"
 description = "A platform-independent machine learning application to classify Palmer penguins, designed for non-technical field usage."
 authors = [
@@ -11,7 +11,7 @@ authors = [
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10, <3.14"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -26,8 +26,13 @@ dependencies = [
     "scikit-learn",
     "palmerpenguins>=0.1.4,<0.2.0",
     "dash",
-    "dash-bootstrap-components"
+    "dash-bootstrap-components",
+    "seaborn (>=0.10.0,<0.14.0)",
+    "matplotlib (>=3.9.0,<3.10.0)",
 ]
+
+[project.scripts]
+penguin-app = "penguin_classifier.app:main"
 
 [tool.poetry]
 packages = [
@@ -48,9 +53,11 @@ jupyterlab = "*"
 notebook = "*"
 matplotlib = "*"
 tqdm = "*"
+ipykernel = "^7.1.0"
+ydata-profiling = "^4.18.0"
 
 [tool.ruff]
-line-length = 99
+line-length = 79
 src = ["src"]
 include = ["pyproject.toml", "src/**/*.py"]
 
