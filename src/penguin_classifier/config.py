@@ -40,5 +40,29 @@ FEATURE_CONSTRAINTS = {
 }
 
 # Mapping for dropdown options
-ISLAND_OPTIONS = ["Biscoe", "Dream", "Torgersen"]
-SEX_OPTIONS = ["male", "female"]
+ISLAND_OPTIONS: list[dict] = [
+    {
+        "label": "Torgersen",
+        "value": "Torgersen",
+    },
+    {
+        "label": "Biscoe",
+        "value": "Biscoe",
+    },
+    {
+        "label": "Dream",
+        "value": "Dream",
+    },
+]
+SEX_OPTIONS: list[dict] = [
+    {
+        "label": "male",
+        "value": "male",
+    },
+    {
+        "label": "female",
+        "value": "female",
+    },
+]
+
+OFFSET = "mb-3"
