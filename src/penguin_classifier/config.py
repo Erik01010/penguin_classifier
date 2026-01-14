@@ -10,7 +10,7 @@ PROJ_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJ_ROOT / "src"
 DATA_DIR = PROJ_ROOT / "data"
 RAW_DATA_PATH = DATA_DIR / "raw" / "data.csv"
-PROCESSED_DATA_PATH = DATA_DIR / "processed / processed.csv"
+PROCESSED_DATA_PATH = DATA_DIR / "processed" / "prediction_history.csv"
 MODEL_PATH = PROJ_ROOT / "models" / "pipeline.joblib"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
@@ -19,7 +19,18 @@ FIGURES_DIR = REPORTS_DIR / "figures"
 RANDOM_SEED = 42
 TEST_SPLIT_SIZE = 0.2
 
-# Numerical features for model training
+# Mapping for csv-saving
+CSV_HEADER = [
+    "species",
+    "island",
+    "bill_length_mm",
+    "bill_depth_mm",
+    "flipper_length_mm",
+    "body_mass_g",
+    "sex",
+]
+
+# Features for model training
 NUMERICAL_FEATURES = [
     "bill_length_mm",
     "bill_depth_mm",
@@ -31,13 +42,15 @@ CATEGORICAL_FEATURES = ["island", "sex"]
 
 FEATURES = NUMERICAL_FEATURES + CATEGORICAL_FEATURES
 
+
 # Validation constraints for numerical features
 FEATURE_CONSTRAINTS = {
-    "bill_length_mm": {"min": 29.4, "max": 62.4},
-    "bill_depth_mm": {"min": 12.3, "max": 22.3},
-    "flipper_length_mm": {"min": 166.0, "max": 237.0},
-    "body_mass_g": {"min": 2300.0, "max": 6700.0},
+    "bill_length_mm": {"min": 29.4, "max": 62.4, "default": 40.0},
+    "bill_depth_mm": {"min": 12.3, "max": 22.3, "default": 20.0},
+    "flipper_length_mm": {"min": 166.0, "max": 237.0, "default": 200.0},
+    "body_mass_g": {"min": 2300.0, "max": 6700.0, "default": 4000.0},
 }
+
 
 # Mapping for dropdown options
 ISLAND_OPTIONS: list[dict] = [

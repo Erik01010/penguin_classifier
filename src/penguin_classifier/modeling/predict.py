@@ -19,11 +19,10 @@ def predict_batch_species(
     return pipeline.predict(X=features)
 
 
-def predict_single_penguin_proba(
-    features: pd.DataFrame, pipeline: Pipeline
-) -> tuple[str, float]:
+def predict_single_penguin_proba(features: pd.DataFrame) -> tuple[str, float]:
     """Predicts species and confidence for a single penguin observation."""
 
+    pipeline = _load_pipeline(MODEL_PATH)
     predicted_species = pipeline.predict(X=features)[0]
 
     all_probabilities = pipeline.predict_proba(X=features)
@@ -41,8 +40,7 @@ if __name__ == "__main__":
 
     df = load_data(RAW_DATA_PATH)
     cleaned_df = clean_data(df)
-    pipeline = _load_pipeline(MODEL_PATH)
     species, proba = predict_single_penguin_proba(
-        features=cleaned_df.iloc[[0]], pipeline=pipeline
+        features=cleaned_df.iloc[[0]]
     )
     print(f"Species: {species}, Probability: {proba}")

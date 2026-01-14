@@ -1,8 +1,5 @@
+import pandas as pd
 from typing import Literal
-
-from dash import html
-from dash.development.base_component import Component
-import dash_bootstrap_components as dbc
 
 from config import (
     FEATURE_CONSTRAINTS,
@@ -10,6 +7,9 @@ from config import (
     OFFSET,
     SEX_OPTIONS,
 )
+from dash import html, dcc
+from dash.development.base_component import Component
+import dash_bootstrap_components as dbc
 
 FIELD_LABELS = {
     "island": "Island Location",
@@ -54,6 +54,9 @@ def _create_input(
         placeholder=PLACEHOLDERS[label],
         min=FEATURE_CONSTRAINTS[label]["min"],
         max=FEATURE_CONSTRAINTS[label]["max"],
+        value=FEATURE_CONSTRAINTS[label][
+            "default"
+        ],  # deactivate to enable placeholders
     )
 
 
@@ -85,7 +88,8 @@ def _create_input_card(
 
 
 def create_layout() -> dbc.Container:
-    container = dbc.Container(
+    """Create the layout structure component."""
+    return dbc.Container(
         children=[
             dbc.Row(
                 [
@@ -93,9 +97,7 @@ def create_layout() -> dbc.Container:
                     dbc.Col(
                         width=3,
                         children=[
-                            html.H4(
-                                children="Enter values:", className="mb-4"
-                            ),
+                            html.Br(),
                             # 1. Input: Island
                             _create_input_card(
                                 label="island",
@@ -167,10 +169,24 @@ def create_layout() -> dbc.Container:
                             dbc.Row(
                                 [
                                     dbc.Label(
-                                        children="Classification Result",
-                                        size="md",
+                                        children="Penguin Classifier",
+                                        style={"margin-top": "10px"},
+                                        size="lg",
                                     ),
-                                    html.Div(id="classification_result"),
+                                    dbc.Card(
+                                        children=[
+                                            dbc.Label(
+                                                children="Classification Result:",
+                                                size="lg",
+                                            ),
+                                            dbc.Alert(
+                                                children="Ergebnis erscheint hier ...",
+                                                id="classification_result",
+                                                color="primary",
+                                                style={"margin-top": "10px"},
+                                            ),
+                                        ]
+                                    ),
                                 ]
                             ),
                             # Output Scatterplot and Table
@@ -179,14 +195,39 @@ def create_layout() -> dbc.Container:
                                     # Scatterplot
                                     dbc.Col(
                                         width=5,
-                                        children=[],
-                                        id="scatterplot_container",
+                                        children=[
+                                            dbc.Label(
+                                                children="Plot",
+                                                size="lg",
+                                            ),
+                                            dbc.Card(
+                                                children=[
+                                                    dcc.Graph(
+                                                        id="scatter_graph",
+                                                        figure={},
+                                                        responsive=True,
+                                                    ),
+                                                ],
+                                                outline=True,
+                                                color="primary",
+                                            ),
+                                        ],
                                     ),
                                     # Table
                                     dbc.Col(
                                         width=4,
-                                        children=[],
-                                        id="table_container",
+                                        children=[
+                                            dbc.Label(
+                                                children="Table",
+                                                size="lg",
+                                            ),
+                                            dbc.Card(
+                                                children=[],
+                                                id="table_container",
+                                                outline=True,
+                                                color="primary",
+                                            ),
+                                        ],
                                     ),
                                 ]
                             ),
@@ -197,4 +238,3 @@ def create_layout() -> dbc.Container:
         ],
         fluid=True,
     )
-    return container

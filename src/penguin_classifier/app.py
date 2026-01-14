@@ -4,6 +4,7 @@ from ui.layout import create_layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+app.title = "Penguin Classifier"
 app.layout = create_layout()
 
 server = app.server

@@ -4,7 +4,12 @@ from loguru import logger
 from palmerpenguins import load_penguins
 import pandas as pd
 
-from penguin_classifier.config import NUMERICAL_FEATURES, RAW_DATA_PATH
+from penguin_classifier.config import (
+    CSV_HEADER,
+    NUMERICAL_FEATURES,
+    RAW_DATA_PATH,
+    PROCESSED_DATA_PATH,
+)
 
 
 def fetch_and_save_raw_data() -> None:
@@ -35,7 +40,6 @@ def load_data(filepath: Path) -> pd.DataFrame:
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """Cleans the penguins dataset by handling missing values."""
     df = df.dropna(subset=NUMERICAL_FEATURES + ["species"], axis="rows")
-    logger.success("Data cleaned.")
     return df.drop(
         columns=["year"],
     )
@@ -49,7 +53,34 @@ def split_feature_from_target(df: pd.DataFrame) -> tuple[pd.DataFrame, list]:
     return features, target
 
 
+def save_prediction(new_data: pd.DataFrame = None):
+    """Appends new data to the CSV file."""
+    file_exists = Path(PROCESSED_DATA_PATH).exists()
+
+    new_data_ordered = new_data[CSV_HEADER]
+    new_data.to_csv(
+        PROCESSED_DATA_PATH, mode="a", header=not file_exists, index=False
+    )
+    logger.success(f"Prediction saved to {PROCESSED_DATA_PATH}")
+
+
+def load_combined_data():
+    """Loads raw and processed dataset and concatenates if history is not empty."""
+    raw_data = load_data(RAW_DATA_PATH)
+    cleaned_data = clean_data(raw_data)
+    if not PROCESSED_DATA_PATH.exists():
+        return raw_data.iloc[::-1]
+    prediction_history = load_data(PROCESSED_DATA_PATH)
+
+    if prediction_history.notna().any().any():
+        updated_data = pd.concat(
+            [cleaned_data, prediction_history], axis="rows"
+        )
+        updated_data = updated_data.iloc[::-1]
+        return updated_data
+
+    return raw_data.iloc[::-1]
+
+
 if __name__ == "__main__":
-    df = load_data(RAW_DATA_PATH)
-    cleaned_df = clean_data(df)
-    print(cleaned_df.columns)
+    load_combined_data()
