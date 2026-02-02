@@ -1,5 +1,6 @@
-import joblib
 import json
+
+import joblib
 from loguru import logger
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
@@ -7,9 +8,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
 from penguin_classifier.config import (
+    METRICS_PATH,
     MODEL_PATH,
     RAW_DATA_PATH,
-    METRICS_PATH,
 )
 from src.penguin_classifier.config import RANDOM_SEED, TEST_SPLIT_SIZE
 from src.penguin_classifier.dataset import (
@@ -46,7 +47,9 @@ def train_model():
     preds = pipeline.predict(X_test)
     logger.success("Pipeline predicted on test set.")
 
-    report_dict = classification_report(y_true=y_test, y_pred=preds, output_dict=True)
+    report_dict = classification_report(
+        y_true=y_test, y_pred=preds, output_dict=True
+    )
     print(classification_report(y_true=y_test, y_pred=preds))
 
     METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)

@@ -1,17 +1,17 @@
-import pandas as pd
 import json
 from typing import Literal
+
+from dash import dcc, html
+from dash.development.base_component import Component
+import dash_bootstrap_components as dbc
 
 from src.penguin_classifier.config import (
     FEATURE_CONSTRAINTS,
     ISLAND_OPTIONS,
+    METRICS_PATH,
     OFFSET,
     SEX_OPTIONS,
-    METRICS_PATH
 )
-from dash import html, dcc
-from dash.development.base_component import Component
-import dash_bootstrap_components as dbc
 
 FIELD_LABELS = {
     "island": "Island Location",
@@ -49,7 +49,7 @@ def _create_performance_card() -> dbc.Card:
         content = [
             html.H5("Model-Performance", className="card-title"),
             html.P(
-                f"The model was trained on historic data",
+                "The model was trained on historic data",
                 className="card-text text-muted small",
             ),
             html.Hr(),

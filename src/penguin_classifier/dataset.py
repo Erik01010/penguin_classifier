@@ -7,8 +7,8 @@ import pandas as pd
 from penguin_classifier.config import (
     CSV_HEADER,
     NUMERICAL_FEATURES,
-    RAW_DATA_PATH,
     PROCESSED_DATA_PATH,
+    RAW_DATA_PATH,
 )
 
 
@@ -58,10 +58,7 @@ def save_prediction(new_data: pd.DataFrame = None):
 
     new_data_ordered = new_data[CSV_HEADER]
     new_data_ordered.to_csv(
-        PROCESSED_DATA_PATH,
-        mode="a",
-        header=not file_exists,
-        index=False
+        PROCESSED_DATA_PATH, mode="a", header=not file_exists, index=False
     )
 
 

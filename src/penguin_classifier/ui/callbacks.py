@@ -1,7 +1,7 @@
 from dash import Input, Output, State, callback, no_update
 import dash_bootstrap_components as dbc
-import pandas as pd
 from loguru import logger
+import pandas as pd
 
 from src.penguin_classifier.dataset import load_combined_data, save_prediction
 from src.penguin_classifier.modeling.predict import (
@@ -86,7 +86,9 @@ def classify_penguin(
             )
             logger.info("callback complete")
             if not sex:
-                result_text += " - Note: No sex provided. Classification may be wrong."
+                result_text += (
+                    " - Note: No sex provided. Classification may be wrong."
+                )
             return result_text, figure, table
 
         except Exception as e:
