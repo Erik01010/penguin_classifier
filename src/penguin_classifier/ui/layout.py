@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 
 from src.penguin_classifier.config import (
     FEATURE_CONSTRAINTS,
+    FEATURES,
     ISLAND_OPTIONS,
     METRICS_PATH,
     OFFSET,
@@ -141,7 +142,6 @@ def _create_input_card(
     offset: str = OFFSET,
     help_text: str = "Please enter a value.",
 ) -> dbc.Card:
-    """Create a Card component with another component as input."""
     return dbc.Card(
         children=[
             dbc.CardBody(
@@ -162,10 +162,32 @@ def _create_input_card(
     )
 
 
+def _create_axis_dropdown(
+    label: str, component_id: str, default_value: str
+) -> dbc.Col:
+    """Create a dropdown for scatter plot axis selection."""
+    return dbc.Col(
+        [
+            dbc.Label(label),
+            dcc.Dropdown(
+                id=component_id,
+                options=[
+                    {"label": FIELD_LABELS[feat], "value": feat}
+                    for feat in FEATURES
+                ],
+                value=default_value,
+                clearable=False,
+            ),
+        ],
+        width=6,
+    )
+
+
 def create_layout() -> dbc.Container:
     """Create the layout structure component."""
     return dbc.Container(
         children=[
+            dcc.Store(id="latest_prediction_store"),
             dbc.Row(
                 [
                     # Left side: input
@@ -290,14 +312,32 @@ def create_layout() -> dbc.Container:
                                                         "Penguin Data Analysis"
                                                     ),
                                                     dbc.CardBody(
-                                                        dcc.Graph(
-                                                            id="scatter_graph",
-                                                            figure={},
-                                                            responsive=True,
-                                                            style={
-                                                                "height": "450px",
-                                                            },
-                                                        ),
+                                                        [
+                                                            dcc.Graph(
+                                                                id="scatter_graph",
+                                                                figure={},
+                                                                responsive=True,
+                                                                style={
+                                                                    "height": "450px",
+                                                                },
+                                                            ),
+                                                            # Add dropdowns for scatter plot customization
+                                                            dbc.Row(
+                                                                [
+                                                                    _create_axis_dropdown(
+                                                                        "Y-Axis",
+                                                                        "scatter_y_axis",
+                                                                        "bill_length_mm",
+                                                                    ),
+                                                                    _create_axis_dropdown(
+                                                                        "X-Axis",
+                                                                        "scatter_x_axis",
+                                                                        "flipper_length_mm",
+                                                                    ),
+                                                                ],
+                                                                className="mt-3",
+                                                            ),
+                                                        ],
                                                         className="p-1",
                                                     ),
                                                 ],

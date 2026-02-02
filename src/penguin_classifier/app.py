@@ -1,6 +1,7 @@
 from dash import Dash
 import dash_bootstrap_components as dbc
-from ui.layout import create_layout
+
+from src.penguin_classifier.ui.layout import create_layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 

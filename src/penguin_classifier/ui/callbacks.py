@@ -1,4 +1,4 @@
-from dash import Input, Output, State, callback, no_update
+from dash import Input, Output, State, callback, ctx, no_update
 import dash_bootstrap_components as dbc
 from loguru import logger
 import pandas as pd
@@ -18,33 +18,83 @@ prediction_history = load_combined_data()
     ),
     Output(component_id="scatter_graph", component_property="figure"),
     Output(component_id="table_container", component_property="children"),
+    Output(component_id="latest_prediction_store", component_property="data"),
     Input(component_id="classify_button", component_property="n_clicks"),
+    Input(component_id="scatter_x_axis", component_property="value"),
+    Input(component_id="scatter_y_axis", component_property="value"),
     State("island_input", "value"),
     State("bill_length_mm_input", "value"),
     State("bill_depth_mm_input", "value"),
     State("flipper_length_mm_input", "value"),
     State("body_mass_g_input", "value"),
     State("sex_input", "value"),
+    State("latest_prediction_store", "data"),
 )
 def classify_penguin(
     n_clicks,
+    x_axis,
+    y_axis,
     island,
     bill_length_mm,
     bill_depth_mm,
     flipper_length_mm,
     body_mass_g,
     sex,
+    latest_prediction,
 ):
     result_text = "Geben Sie die Daten ein und klicken Sie auf Classify."
     new_penguin_data = None
-    print("Callback triggered")
+    trigger_id = ctx.triggered_id
+
+    # Handle initial load or dropdown interactions
+    if trigger_id != "classify_button" and n_clicks is None:
+        # Initial startup
+        current_data = load_combined_data()
+        fig = create_scatter_plot(
+            df_historic=current_data,
+            x_column=x_axis or "flipper_length_mm",
+            y_column=y_axis or "bill_length_mm",
+            size_column="body_mass_g",
+            new_data=new_penguin_data,
+        )
+        try:
+            updated_data = load_combined_data().head(10)
+            table = dbc.Table.from_dataframe(
+                updated_data, striped=True, bordered=True, hover=True
+            )
+        except FileNotFoundError:
+            table = "Noch keine historischen Daten verfügbar."
+
+        logger.info("initial callback complete")
+        return result_text, fig, table, no_update
+
+    # Handle dropdown changes only (if button wasn't clicked)
+    if trigger_id in ["scatter_x_axis", "scatter_y_axis"]:
+        current_data = load_combined_data()
+
+        # Check if we have a stored prediction to display
+        new_data = None
+        if latest_prediction:
+            try:
+                new_data = pd.DataFrame(latest_prediction)
+            except Exception:
+                logger.warning("Could not restore classification from store")
+
+        fig = create_scatter_plot(
+            df_historic=current_data,
+            x_column=x_axis,
+            y_column=y_axis,
+            size_column="body_mass_g",
+            new_data=new_data,
+        )
+        return no_update, fig, no_update, no_update
 
     # Click on classify-button
-    if n_clicks is not None:
+    if trigger_id == "classify_button":
         # Input validation
         if not island:
             logger.warning("missing island input")
-            return "Please enter island.", no_update, no_update
+            return "Please enter island.", no_update, no_update, no_update
 
         try:
             penguin_attributes = pd.DataFrame(
@@ -67,10 +117,15 @@ def classify_penguin(
 
             save_prediction(new_penguin_data)
 
+            # Serialize for store
+            store_data = penguin_attributes.to_dict("records")
+
             refreshed_data = load_combined_data()
 
             figure = create_scatter_plot(
                 df_historic=refreshed_data,
+                x_column=x_axis,
+                y_column=y_axis,
                 size_column="body_mass_g",
                 new_data=penguin_attributes,
             )
@@ -89,26 +144,10 @@ def classify_penguin(
                 result_text += (
                     " - Note: No sex provided. Classification may be wrong."
                 )
-            return result_text, figure, table
+            return result_text, figure, table, store_data
 
         except Exception as e:
             logger.exception("Error in Callback:")
-            return f"DEBUG ERROR: {str(e)}", {}, ""
+            return f"DEBUG ERROR: {str(e)}", {}, "", no_update
 
-    # initial startup - no button clicks yet
-    current_data = load_combined_data()
-    fig = create_scatter_plot(
-        df_historic=current_data,
-        size_column="body_mass_g",
-        new_data=new_penguin_data,
-    )
-    try:
-        updated_data = load_combined_data().head(10)
-        table = dbc.Table.from_dataframe(
-            updated_data.head(10), striped=True, bordered=True, hover=True
-        )
-    except FileNotFoundError:
-        table = "Noch keine historischen Daten verfügbar."
-
-    logger.info("initial callback complete")
-    return result_text, fig, table
+    return no_update, no_update, no_update, no_update
