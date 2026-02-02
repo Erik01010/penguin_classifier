@@ -37,11 +37,16 @@ def classify_penguin(
 ):
     result_text = "Geben Sie die Daten ein und klicken Sie auf Classify."
     new_penguin_data = None
-    print("Callback ausgelöst!")
+    print("Callback triggered")
 
+    # Click on classify-button
     if n_clicks is not None:
+        # Input validation
+        if not island:
+            logger.warning("missing island input")
+            return "Please enter island.", no_update, no_update
+
         try:
-            logger.info("convert values to dataframe...")
             penguin_attributes = pd.DataFrame(
                 {
                     "island": [island],
@@ -52,7 +57,6 @@ def classify_penguin(
                     "sex": [sex],
                 }
             )
-            logger.info("dict converted to dataframe...")
             species, proba = predict_single_penguin_proba(
                 features=penguin_attributes
             )
@@ -61,18 +65,18 @@ def classify_penguin(
             penguin_attributes["species"] = species
             new_penguin_data = penguin_attributes
 
-            save_prediction(penguin_attributes)
-            logger.info("prediction saved")
+            save_prediction(new_penguin_data)
+
+            refreshed_data = load_combined_data()
 
             figure = create_scatter_plot(
-                df_historic=prediction_history,
+                df_historic=refreshed_data,
                 size_column="body_mass_g",
                 new_data=penguin_attributes,
             )
             logger.info("scatter plot created")
 
             updated_data = load_combined_data().head(10)
-            updated_data = updated_data.iloc[::-1]
             table = dbc.Table.from_dataframe(
                 updated_data,
                 striped=True,
@@ -80,14 +84,16 @@ def classify_penguin(
                 hover=True,
                 index=True,
             )
-            logger.info("table created")
-            print(table)
+            logger.info("callback complete")
+            if not sex:
+                result_text += " - Note: No sex provided. Classification may be wrong."
             return result_text, figure, table
 
         except Exception as e:
-            logger.exception("Fehler im Callback:")
+            logger.exception("Error in Callback:")
             return f"DEBUG ERROR: {str(e)}", {}, ""
 
+    # initial startup - no button clicks yet
     current_data = load_combined_data()
     fig = create_scatter_plot(
         df_historic=current_data,
@@ -96,13 +102,11 @@ def classify_penguin(
     )
     try:
         updated_data = load_combined_data().head(10)
-        updated_data = updated_data.iloc[::-1]
         table = dbc.Table.from_dataframe(
             updated_data.head(10), striped=True, bordered=True, hover=True
         )
     except FileNotFoundError:
-        # Fallback beim allerersten Start ohne History
         table = "Noch keine historischen Daten verfügbar."
 
-        # 4. Alles zurückgeben
+    logger.info("initial callback complete")
     return result_text, fig, table

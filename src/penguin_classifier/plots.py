@@ -22,7 +22,7 @@ def create_scatter_plot(
         title="Penguin Data",
         size=size_column,
         template="simple_white",
-        opacity=0.8,
+        opacity=0.7,
     )
 
     if new_data is not None:
@@ -36,7 +36,7 @@ def create_scatter_plot(
                     size=12,
                     opacity=1,
                     symbol="star",
-                    line=dict(width=2, color="black"),
+                    line=dict(width=1, color="black"),
                 ),
                 name="Latest Prediction",
             )

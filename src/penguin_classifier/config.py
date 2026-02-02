@@ -14,6 +14,7 @@ PROCESSED_DATA_PATH = DATA_DIR / "processed" / "prediction_history.csv"
 MODEL_PATH = PROJ_ROOT / "models" / "pipeline.joblib"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
+METRICS_PATH = REPORTS_DIR / "metrics.json"
 
 # Global constants
 RANDOM_SEED = 42

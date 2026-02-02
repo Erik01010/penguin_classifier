@@ -1,11 +1,13 @@
 import pandas as pd
+import json
 from typing import Literal
 
-from config import (
+from src.penguin_classifier.config import (
     FEATURE_CONSTRAINTS,
     ISLAND_OPTIONS,
     OFFSET,
     SEX_OPTIONS,
+    METRICS_PATH
 )
 from dash import html, dcc
 from dash.development.base_component import Component
@@ -28,6 +30,79 @@ PLACEHOLDERS = {
     "body_mass_g": "e.g. 3750.0",
     "sex": "female",
 }
+
+
+def _create_performance_card() -> dbc.Card:
+    """Load metrics and create performance card."""
+    try:
+        with open(METRICS_PATH, "r") as f:
+            report = json.load(f)
+
+        accuracy = report.get("accuracy", 0)
+        macro_avg = report.get("macro avg", {})
+
+        acc_text = f"{accuracy:.1%}"
+        f1_text = f"{macro_avg.get('f1-score', 0):.1%}"
+        precision_text = f"{macro_avg.get('precision', 0):.1%}"
+        recall_text = f"{macro_avg.get('recall', 0):.1%}"
+
+        content = [
+            html.H5("Model-Performance", className="card-title"),
+            html.P(
+                f"The model was trained on historic data",
+                className="card-text text-muted small",
+            ),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            html.H2(acc_text, className="text-primary"),
+                            html.Small("Accuracy"),
+                        ],
+                        width=3,
+                        xs=6,
+                    ),
+                    dbc.Col(
+                        [
+                            html.H2(precision_text, className="text-info"),
+                            html.Small("Precision"),
+                        ],
+                        width=3,
+                        xs=6,
+                    ),
+                    dbc.Col(
+                        [
+                            html.H2(recall_text, className="text-info"),
+                            html.Small("Recall"),
+                        ],
+                        width=3,
+                        xs=6,
+                    ),
+                    dbc.Col(
+                        [
+                            html.H2(f1_text, className="text-info"),
+                            html.Small("F1-Score"),
+                        ],
+                        width=3,
+                        xs=6,
+                    ),
+                ],
+                className="text-center",
+            ),
+        ]
+    except FileNotFoundError:
+        content = [
+            html.H5("Model-Performance", className="card-title"),
+            dbc.Alert(
+                "No metrics found. Please train model.",
+                color="warning",
+            ),
+        ]
+
+    return dbc.Card(
+        dbc.CardBody(content), className="shadow-sm border-1 h-100"
+    )
 
 
 def _create_select(
@@ -97,7 +172,7 @@ def create_layout() -> dbc.Container:
                     dbc.Col(
                         width=3,
                         children=[
-                            html.Br(),
+                            html.H4("Input Data", className="mb-3"),
                             # 1. Input: Island
                             _create_input_card(
                                 label="island",
@@ -153,63 +228,81 @@ def create_layout() -> dbc.Container:
                                                 children="Classify",
                                                 id="classify_button",
                                                 color="primary",
+                                                className="w-100",
+                                                size="lg",
                                             ),
                                         ]
                                     )
                                 ],
-                                className=OFFSET,
+                                className="shadow-sm border-0",
                             ),
                         ],
                     ),
                     # Right side: Output
                     dbc.Col(
                         width=9,
+                        lg=9,
                         children=[
                             # Output classification and score.
                             dbc.Row(
                                 [
-                                    dbc.Label(
-                                        children="Penguin Classifier",
-                                        style={"margin-top": "10px"},
-                                        size="lg",
-                                    ),
-                                    dbc.Card(
-                                        children=[
-                                            dbc.Label(
-                                                children="Classification Result:",
-                                                size="lg",
+                                    dbc.Col(
+                                        [
+                                            html.H3(
+                                                "Penguin Classifier",
+                                                className="mb-3",
                                             ),
-                                            dbc.Alert(
-                                                children="Ergebnis erscheint hier ...",
-                                                id="classification_result",
-                                                color="primary",
-                                                style={"margin-top": "10px"},
+                                            dbc.Card(
+                                                children=[
+                                                    dbc.CardHeader(
+                                                        "Classification Result",
+                                                        className="fw-bold",
+                                                    ),
+                                                    dbc.CardBody(
+                                                        dbc.Alert(
+                                                            children="Bitte Werte eingeben und 'Classify' drücken...",
+                                                            id="classification_result",
+                                                            color="info",
+                                                            className="text-center fw-bold m-0",
+                                                            style={
+                                                                "marginTop": "10px"
+                                                            },
+                                                        ),
+                                                    ),
+                                                ]
                                             ),
                                         ]
-                                    ),
+                                    )
                                 ]
                             ),
+                            html.Br(),
                             # Output Scatterplot and Table
                             dbc.Row(
                                 [
                                     # Scatterplot
                                     dbc.Col(
-                                        width=5,
+                                        width=8,
+                                        xl=8,
                                         children=[
-                                            dbc.Label(
-                                                children="Plot",
-                                                size="lg",
-                                            ),
                                             dbc.Card(
                                                 children=[
-                                                    dcc.Graph(
-                                                        id="scatter_graph",
-                                                        figure={},
-                                                        responsive=True,
+                                                    dbc.CardHeader(
+                                                        "Penguin Data Analysis"
+                                                    ),
+                                                    dbc.CardBody(
+                                                        dcc.Graph(
+                                                            id="scatter_graph",
+                                                            figure={},
+                                                            responsive=True,
+                                                            style={
+                                                                "height": "450px",
+                                                            },
+                                                        ),
+                                                        className="p-1",
                                                     ),
                                                 ],
                                                 outline=True,
-                                                color="primary",
+                                                className="shadow-sm border-1 h-100",
                                             ),
                                         ],
                                     ),
@@ -217,24 +310,41 @@ def create_layout() -> dbc.Container:
                                     dbc.Col(
                                         width=4,
                                         children=[
-                                            dbc.Label(
-                                                children="Table",
-                                                size="lg",
-                                            ),
                                             dbc.Card(
-                                                children=[],
-                                                id="table_container",
-                                                outline=True,
-                                                color="primary",
-                                            ),
+                                                [
+                                                    dbc.CardHeader("History"),
+                                                    dbc.CardBody(
+                                                        html.Div(
+                                                            id="table_container",
+                                                            style={
+                                                                "maxHeight": "430px",
+                                                                "overflowY": "auto",
+                                                            },
+                                                        )
+                                                    ),
+                                                ],
+                                                className="shadow-sm border-1 h-100",
+                                            )
                                         ],
                                     ),
-                                ]
+                                ],
+                                className="g-3",
+                            ),
+                            html.Br(),
+                            dbc.Row(
+                                [
+                                    dbc.Col(
+                                        width=12,
+                                        children=[_create_performance_card()],
+                                    )
+                                ],
                             ),
                         ],
                     ),
-                ]
+                ],
+                className="g-4",
             ),
         ],
         fluid=True,
+        className="p-4 bg-light",
     )

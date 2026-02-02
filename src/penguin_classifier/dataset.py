@@ -31,7 +31,6 @@ def load_data(filepath: Path) -> pd.DataFrame:
     """Loads data from a CSV file into a pandas DataFrame."""
     try:
         data = pd.read_csv(filepath)
-        logger.info(f"Data loaded from {filepath}")
         return data
     except FileNotFoundError:
         raise FileNotFoundError(f"No data found at {filepath}") from None
@@ -58,10 +57,12 @@ def save_prediction(new_data: pd.DataFrame = None):
     file_exists = Path(PROCESSED_DATA_PATH).exists()
 
     new_data_ordered = new_data[CSV_HEADER]
-    new_data.to_csv(
-        PROCESSED_DATA_PATH, mode="a", header=not file_exists, index=False
+    new_data_ordered.to_csv(
+        PROCESSED_DATA_PATH,
+        mode="a",
+        header=not file_exists,
+        index=False
     )
-    logger.success(f"Prediction saved to {PROCESSED_DATA_PATH}")
 
 
 def load_combined_data():
@@ -70,17 +71,16 @@ def load_combined_data():
     cleaned_data = clean_data(raw_data)
     if not PROCESSED_DATA_PATH.exists():
         return raw_data.iloc[::-1]
-    prediction_history = load_data(PROCESSED_DATA_PATH)
 
+    prediction_history = load_data(PROCESSED_DATA_PATH)
     if prediction_history.notna().any().any():
         updated_data = pd.concat(
             [cleaned_data, prediction_history], axis="rows"
         )
-        updated_data = updated_data.iloc[::-1]
-        return updated_data
+        return updated_data.iloc[::-1]
 
     return raw_data.iloc[::-1]
 
 
 if __name__ == "__main__":
-    load_combined_data()
+    pass
