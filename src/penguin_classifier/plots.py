@@ -14,11 +14,17 @@ def create_scatter_plot(
     Create a scatter plot of penguin dataset.
     The latest datapoint generated is highlighted.
     """
+    color_map = {
+        "Adelie": "#636EFA",
+        "Chinstrap": "#EF553B",
+        "Gentoo": "#00CC96",
+    }
     fig = px.scatter(
         data_frame=df_historic,
         x=x_column,
         y=y_column,
         color="species",
+        color_discrete_map=color_map,
         title="Penguin Data",
         size=size_column,
         template="simple_white",

@@ -39,13 +39,13 @@ def _create_performance_card() -> dbc.Card:
         with open(METRICS_PATH, "r") as f:
             report = json.load(f)
 
-        accuracy = report.get("accuracy", 0)
         macro_avg = report.get("macro avg", {})
-
+        accuracy = report.get("accuracy", 0)
         acc_text = f"{accuracy:.1%}"
         f1_text = f"{macro_avg.get('f1-score', 0):.1%}"
         precision_text = f"{macro_avg.get('precision', 0):.1%}"
         recall_text = f"{macro_avg.get('recall', 0):.1%}"
+        best_cv_score = f"{report.get('cross_val_accuracy', 0):.1%}"
 
         content = [
             html.H5("Model-Performance", className="card-title"),
@@ -84,6 +84,14 @@ def _create_performance_card() -> dbc.Card:
                         [
                             html.H2(f1_text, className="text-info"),
                             html.Small("F1-Score"),
+                        ],
+                        width=3,
+                        xs=6,
+                    ),
+                    dbc.Col(
+                        [
+                            html.H2(best_cv_score, className="text-info"),
+                            html.Small("Cross-Validation-Accuracy"),
                         ],
                         width=3,
                         xs=6,
@@ -142,6 +150,10 @@ def _create_input_card(
     offset: str = OFFSET,
     help_text: str = "Please enter a value.",
 ) -> dbc.Card:
+    if label in ["island", "sex"]:
+        form_text = help_text
+    else:
+        form_text = f"Allowed values between {FEATURE_CONSTRAINTS[label]['min']} and {FEATURE_CONSTRAINTS[label]['max']}"
     return dbc.Card(
         children=[
             dbc.CardBody(
@@ -152,7 +164,7 @@ def _create_input_card(
                     ),
                     input_component,
                     dbc.FormText(
-                        children=help_text,
+                        children=form_text,
                         color="secondary",
                     ),
                 ]
@@ -271,19 +283,22 @@ def create_layout() -> dbc.Container:
                                     dbc.Col(
                                         [
                                             html.H3(
-                                                "Penguin Classifier",
+                                                children="Penguin Classifier",
                                                 className="mb-3",
                                             ),
                                             dbc.Card(
                                                 children=[
                                                     dbc.CardHeader(
-                                                        "Classification Result",
+                                                        children="Classification Result",
                                                         className="fw-bold",
                                                     ),
                                                     dbc.CardBody(
                                                         dbc.Alert(
-                                                            children="Bitte Werte eingeben und 'Classify' drücken...",
+                                                            children="",
                                                             id="classification_result",
+                                                            is_open=False,
+                                                            dismissable=True,
+                                                            fade=True,
                                                             color="info",
                                                             className="text-center fw-bold m-0",
                                                             style={
@@ -303,13 +318,14 @@ def create_layout() -> dbc.Container:
                                 [
                                     # Scatterplot
                                     dbc.Col(
-                                        width=8,
-                                        xl=8,
+                                        width=6,
+                                        xl=6,
                                         children=[
                                             dbc.Card(
                                                 children=[
                                                     dbc.CardHeader(
-                                                        "Penguin Data Analysis"
+                                                        children="Penguin Data Analysis",
+                                                        className="fw-bold",
                                                     ),
                                                     dbc.CardBody(
                                                         [
@@ -348,11 +364,14 @@ def create_layout() -> dbc.Container:
                                     ),
                                     # Table
                                     dbc.Col(
-                                        width=4,
+                                        width=6,
                                         children=[
                                             dbc.Card(
                                                 [
-                                                    dbc.CardHeader("History"),
+                                                    dbc.CardHeader(
+                                                        children="History",
+                                                        className="fw-bold",
+                                                    ),
                                                     dbc.CardBody(
                                                         html.Div(
                                                             id="table_container",

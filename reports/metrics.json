@@ -1,1 +1,34 @@
-{"Adelie": {"precision": 1.0, "recall": 1.0, "f1-score": 1.0, "support": 35.0}, "Chinstrap": {"precision": 1.0, "recall": 1.0, "f1-score": 1.0, "support": 11.0}, "Gentoo": {"precision": 1.0, "recall": 1.0, "f1-score": 1.0, "support": 23.0}, "accuracy": 1.0, "macro avg": {"precision": 1.0, "recall": 1.0, "f1-score": 1.0, "support": 69.0}, "weighted avg": {"precision": 1.0, "recall": 1.0, "f1-score": 1.0, "support": 69.0}}
+{
+    "Adelie": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 30.0
+    },
+    "Chinstrap": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 14.0
+    },
+    "Gentoo": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 25.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 69.0
+    },
+    "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 69.0
+    },
+    "cross_val_accuracy": 0.99
+}

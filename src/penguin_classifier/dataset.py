@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from loguru import logger
-from palmerpenguins import load_penguins
 import pandas as pd
 
 from penguin_classifier.config import (
@@ -19,6 +18,8 @@ def fetch_and_save_raw_data() -> None:
             f"Raw data already exists at {RAW_DATA_PATH}, skipping fetch."
         )
         return None
+
+    from palmerpenguins import load_penguins
 
     raw_data = load_penguins()
     RAW_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -63,11 +64,11 @@ def save_prediction(new_data: pd.DataFrame = None):
 
 
 def load_combined_data():
-    """Loads raw and processed dataset and concatenates if history is not empty."""
+    """Loads datasets and concatenates if history is not empty."""
     raw_data = load_data(RAW_DATA_PATH)
     cleaned_data = clean_data(raw_data)
     if not PROCESSED_DATA_PATH.exists():
-        return raw_data.iloc[::-1]
+        return cleaned_data.iloc[::-1]
 
     prediction_history = load_data(PROCESSED_DATA_PATH)
     if prediction_history.notna().any().any():
@@ -76,7 +77,7 @@ def load_combined_data():
         )
         return updated_data.iloc[::-1]
 
-    return raw_data.iloc[::-1]
+    return cleaned_data.iloc[::-1]
 
 
 if __name__ == "__main__":

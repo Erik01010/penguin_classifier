@@ -46,10 +46,10 @@ FEATURES = NUMERICAL_FEATURES + CATEGORICAL_FEATURES
 
 # Validation constraints for numerical features
 FEATURE_CONSTRAINTS = {
-    "bill_length_mm": {"min": 29.4, "max": 62.4, "default": 40.0},
-    "bill_depth_mm": {"min": 12.3, "max": 22.3, "default": 20.0},
-    "flipper_length_mm": {"min": 166.0, "max": 237.0, "default": 200.0},
-    "body_mass_g": {"min": 2300.0, "max": 6700.0, "default": 4000.0},
+    "bill_length_mm": {"min": 25.0, "max": 65.0, "default": 40.0},
+    "bill_depth_mm": {"min": 10.0, "max": 25.0, "default": 20.0},
+    "flipper_length_mm": {"min": 150.0, "max": 250.0, "default": 200.0},
+    "body_mass_g": {"min": 2000.0, "max": 7500.0, "default": 4000.0},
 }
 
 
