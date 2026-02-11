@@ -1,70 +1,146 @@
-# Penguin Classifier
+# 🐧 Penguin Species Classifier
 
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
+An interactive Machine Learning web application to predict penguin species based on physical characteristics. Built with **Python**, **Dash**, **Scikit-Learn**, and **Docker**.
 
-A platform-independent machine learning application to classify Palmer penguins, designed for non-technical field usage.
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## Project Organization
+## 📋 Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [🚀 Quick Start (Docker)](#-quick-start-docker)
+- [Local Development](#local-development)
+- [Model Information](#model-information)
+- [Troubleshooting](#troubleshooting)
 
-```
-├── .gitignore
-├── Dockerfile
-├── LICENSE
-├── Makefile
-├── poetry.lock
-├── pyproject.toml
-├── README.md
-├── start_linux.sh
-├── start_windows.bat
-├── data
-│   ├── processed
-│   └── raw
-├── docs
-│   ├── .gitkeep
-│   ├── README.md
-│   ├── mkdocs.yml
-│   └── docs
-│       ├── getting-started.md
-│       └── index.md
-├── metrics
-├── models
-│   ├── .gitkeep
-│   └── pipeline.joblib
-├── notebooks
-│   ├── .gitkeep
-│   └── 01_initial_eda.ipynb
-├── references
-│   └── .gitkeep
-├── reports
-│   ├── .gitkeep
-│   ├── metrics.json
-│   ├── penguin_raw_data_profile.html
-│   └── figures
-│       └── .gitkeep
-├── src
-│   ├── __init__.py
-│   └── penguin_classifier
-│       ├── __init__.py
-│       ├── app.py
-│       ├── config.py
-│       ├── dataset.py
-│       ├── features.py
-│       ├── plots.py
-│       ├── modeling
-│       │   ├── __init__.py
-│       │   ├── predict.py
-│       │   └── train.py
-│       └── ui
-│           ├── __init__.py
-│           ├── callbacks.py
-│           └── layout.py
-└── tests
-    ├── __init__.py
-    ├── test_backend.py
-    └── test_frontend.py
+---
+
+## Overview
+
+This project implements a full end-to-end Machine Learning pipeline. It trains a **Logistic Regression** model on the Palmer Penguins dataset and serves it via a user-friendly web interface.
+
+Users can input physical measurements (bill length, flipper length, etc.) to get a real-time prediction of the penguin species (*Adelie*, *Chinstrap*, or *Gentoo*). All predictions are saved locally for historical analysis.
+
+## Key Features
+
+* **Interactive Dashboard:** Built with Plotly Dash and Bootstrap components.
+* **Real-time Inference:** Immediate classification results with probability scores.
+* **Data Persistence:** User predictions are saved to `data/processed/` and visualized alongside historical data.
+* **Containerized:** Fully Dockerized for "write once, run anywhere" deployment.
+* **Robust Pipeline:** Automated data cleaning, feature engineering, and hyperparameter tuning using `GridSearchCV`.
+
+---
+
+## Project Structure
+
+This project follows the **Cookiecutter Data Science** standard:
+
+```text
+├── Dockerfile                  # Instructions to build the container
+├── start_app_windows.bat       # One-click launcher for Windows
+├── start_app_linux.sh          # Launcher for Mac/Linux
+├── data/                       # Local data storage
+│   ├── raw/                    # Original dataset (read-only)
+│   └── processed/              # User prediction history (append-only)
+├── models/                     # Serialized model artifacts (pipeline.joblib)
+├── notebooks/                  # Jupyter notebooks for EDA
+├── reports/                    # Generated metrics and figures
+└── src/                        # Source code
+    └── penguin_classifier/
+        ├── app.py              # Application entry point
+        ├── config.py           # Configuration & constants
+        ├── dataset.py          # Data loading & persistence logic
+        ├── features.py         # Feature engineering (pipelines)
+        ├── plots.py            # Visualization logic
+        └── modeling/           # Training and prediction logic
 ```
 
---------
+---
 
+## Prerequisites
+
+To run the application in the recommended mode, you only need:
+
+* **Docker Desktop** (running)
+
+*Note: No Python installation is required on your local machine if you use the provided scripts.*
+
+---
+
+## 🚀 Quick Start (Docker)
+
+Pprovided are automated scripts to build and run the application in a container.
+
+### For Windows Users
+1.  Ensure Docker Desktop is running.
+2.  Double-click the file **`start_app_windows.bat`**.
+3.  A console window will open, build the image, and automatically launch your default browser at `http://localhost:8050`.
+
+### For Mac / Linux Users
+1.  Open your terminal.
+2.  Navigate to the project folder.
+3.  Make the script executable (only needed once):
+    ```bash
+    chmod +x start_app_linux.sh
+    ```
+4.  Run the script:
+    ```bash
+    ./start_app_linux.sh
+    ```
+
+**Stopping the App:**
+Simply close the terminal window or press `CTRL + C`. The container will automatically shut down and clean up.
+
+---
+
+## Local Development
+
+If you wish to develop or run the code without Docker, you need **Python 3.10+** and **Poetry** (or pip).
+
+1.  **Install Dependencies:**
+    ```bash
+    pip install .
+    ```
+    *Or using Poetry:*
+    ```bash
+    poetry install
+    ```
+
+2.  **Train the Model:**
+    If you want to retrain the model with new parameters:
+    ```bash
+    python -m src.penguin_classifier.modeling.train
+    ```
+    This updates `models/pipeline.joblib` and `reports/metrics.json`.
+
+3.  **Run the App:**
+    ```bash
+    python -m src.penguin_classifier.app
+    ```
+
+---
+
+## Model Information
+
+The classification model is a **Logistic Regression** pipeline optimized via 5-fold Cross-Validation.
+
+* **Preprocessing:**
+    * *Numerical Features:* Scaled using `StandardScaler`.
+    * *Categorical Features:* Encoded using `OneHotEncoder`.
+* **Performance:**
+    * Metrics (Accuracy, F1-Score, Precision, Recall) are automatically tracked in `reports/metrics.json` after every training run.
+    * Current Test Accuracy: **>98%** (depending on the random seed).
+
+---
+
+## Troubleshooting
+
+**Problem: "Port 8050 is already in use"**
+* **Cause:** Another instance of the app is already running.
+* **Solution:** Close any open terminal windows running the app or run `docker stop $(docker ps -q)` to kill all containers.
+
+**Problem: Docker script closes immediately**
+* **Solution:** Open Docker Desktop and ensure the engine is running.
