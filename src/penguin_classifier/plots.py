@@ -1,3 +1,8 @@
+"""
+Visualization module for the Penguin Classifier.
+Uses Plotly to generate interactive charts for the Dash UI.
+"""
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -11,26 +16,42 @@ def create_scatter_plot(
     new_data: pd.DataFrame = None,
 ) -> go.Figure:
     """
-    Create a scatter plot of penguin dataset.
-    The latest datapoint generated is highlighted.
+    Generates an interactive scatter plot of the penguin population.
+
+    Historical data is displayed with partial transparency, while the latest
+    prediction is highlighted as a distinct star icon.
+
+    Args:
+        df_historic (pd.DataFrame): The base dataset containing past observations.
+        x_column (str): Feature to plot on the X-axis.
+        y_column (str): Feature to plot on the Y-axis.
+        size_column (str, optional): Feature to determine marker size.
+        new_data (pd.DataFrame, optional): The single most recent prediction to highlight.
+
+    Returns:
+        go.Figure: A Plotly figure object ready for rendering in the Dash UI.
     """
+    # Define a consistent color scheme for penguin species
     color_map = {
         "Adelie": "#636EFA",
         "Chinstrap": "#EF553B",
         "Gentoo": "#00CC96",
     }
+
+    # Create the background scatter plot (historical data)
     fig = px.scatter(
         data_frame=df_historic,
         x=x_column,
         y=y_column,
         color="species",
         color_discrete_map=color_map,
-        title="Penguin Data",
+        title="Penguin Data Distribution",
         size=size_column,
         template="simple_white",
         opacity=0.5,
     )
 
+    # Overlay the latest prediction if available
     if new_data is not None:
         fig.add_trace(
             go.Scatter(

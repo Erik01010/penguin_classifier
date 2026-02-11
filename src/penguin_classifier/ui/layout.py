@@ -1,3 +1,8 @@
+"""
+Defines the visual structure of the Dash application.
+Uses Dash Bootstrap Components (dbc) to create a responsive dashboard layout.
+"""
+
 import json
 from typing import Literal
 
@@ -14,6 +19,7 @@ from src.penguin_classifier.config import (
     SEX_OPTIONS,
 )
 
+# Human-readable labels for the UI
 FIELD_LABELS = {
     "island": "Island Location",
     "bill_length_mm": "Bill Length (mm)",
@@ -23,6 +29,7 @@ FIELD_LABELS = {
     "sex": "Sex",
 }
 
+# Example values shown in empty input fields
 PLACEHOLDERS = {
     "island": "e.g. Torgersen",
     "bill_length_mm": "e.g. 38.5",
@@ -34,13 +41,19 @@ PLACEHOLDERS = {
 
 
 def _create_performance_card() -> dbc.Card:
-    """Load metrics and create performance card."""
+    """
+    Reads the metrics.json file and creates a card showing model performance.
+
+    Displays Accuracy, Precision, Recall, F1-Score, and CV-Accuracy in a row.
+    """
     try:
         with open(METRICS_PATH, "r") as f:
             report = json.load(f)
 
         macro_avg = report.get("macro avg", {})
         accuracy = report.get("accuracy", 0)
+
+        # Format metrics as percentages
         acc_text = f"{accuracy:.1%}"
         f1_text = f"{macro_avg.get('f1-score', 0):.1%}"
         precision_text = f"{macro_avg.get('precision', 0):.1%}"
@@ -48,16 +61,16 @@ def _create_performance_card() -> dbc.Card:
         best_cv_score = f"{report.get('cross_val_accuracy', 0):.1%}"
 
         content = [
-            html.H5("Model-Performance", className="card-title"),
+            html.H5(children="Model Performance", className="card-title"),
             html.P(
-                "The model was trained on historic data",
+                children="Trained on historical data using optimized hyperparameters.",
                 className="card-text text-muted small",
             ),
             html.Hr(),
             dbc.Row(
-                [
+                children=[
                     dbc.Col(
-                        [
+                        children=[
                             html.H2(acc_text, className="text-primary"),
                             html.Small("Accuracy"),
                         ],
@@ -65,7 +78,7 @@ def _create_performance_card() -> dbc.Card:
                         xs=6,
                     ),
                     dbc.Col(
-                        [
+                        children=[
                             html.H2(precision_text, className="text-info"),
                             html.Small("Precision"),
                         ],
@@ -73,7 +86,7 @@ def _create_performance_card() -> dbc.Card:
                         xs=6,
                     ),
                     dbc.Col(
-                        [
+                        children=[
                             html.H2(recall_text, className="text-info"),
                             html.Small("Recall"),
                         ],
@@ -81,7 +94,7 @@ def _create_performance_card() -> dbc.Card:
                         xs=6,
                     ),
                     dbc.Col(
-                        [
+                        children=[
                             html.H2(f1_text, className="text-info"),
                             html.Small("F1-Score"),
                         ],
@@ -89,9 +102,9 @@ def _create_performance_card() -> dbc.Card:
                         xs=6,
                     ),
                     dbc.Col(
-                        [
+                        children=[
                             html.H2(best_cv_score, className="text-info"),
-                            html.Small("Cross-Validation-Accuracy"),
+                            html.Small("CV-Accuracy"),
                         ],
                         width=3,
                         xs=6,
@@ -102,9 +115,9 @@ def _create_performance_card() -> dbc.Card:
         ]
     except FileNotFoundError:
         content = [
-            html.H5("Model-Performance", className="card-title"),
+            html.H5(children="Model Performance", className="card-title"),
             dbc.Alert(
-                "No metrics found. Please train model.",
+                children="No metrics found. Please ensure the model is trained.",
                 color="warning",
             ),
         ]
@@ -117,7 +130,7 @@ def _create_performance_card() -> dbc.Card:
 def _create_select(
     label: str, options: list[dict], required: bool = False
 ) -> dbc.Select:
-    """create a select component with dash bootstrap components"""
+    """Helper to create a Bootstrap dropdown select component."""
     component_id = "{}_input".format(label)
     return dbc.Select(
         id=component_id,
@@ -130,7 +143,7 @@ def _create_select(
 def _create_input(
     label: str, input_type: Literal["text", "number"]
 ) -> dbc.Input:
-    """create an input component with dash bootstrap components"""
+    """Helper to create a Bootstrap numeric or text input with validation constraints."""
     component_id = "{}_input".format(label)
     return dbc.Input(
         id=component_id,
@@ -138,9 +151,7 @@ def _create_input(
         placeholder=PLACEHOLDERS[label],
         min=FEATURE_CONSTRAINTS[label]["min"],
         max=FEATURE_CONSTRAINTS[label]["max"],
-        value=FEATURE_CONSTRAINTS[label][
-            "default"
-        ],  # deactivate to enable placeholders
+        value=FEATURE_CONSTRAINTS[label]["default"],
     )
 
 
@@ -148,12 +159,14 @@ def _create_input_card(
     label: str,
     input_component: Component,
     offset: str = OFFSET,
-    help_text: str = "Please enter a value.",
+    help_text: str = "Select a value.",
 ) -> dbc.Card:
+    """Wraps an input component into a styled Bootstrap card with labels and help texts."""
     if label in ["island", "sex"]:
         form_text = help_text
     else:
-        form_text = f"Allowed values between {FEATURE_CONSTRAINTS[label]['min']} and {FEATURE_CONSTRAINTS[label]['max']}"
+        form_text = f"Range: {FEATURE_CONSTRAINTS[label]['min']} to {FEATURE_CONSTRAINTS[label]['max']}"
+
     return dbc.Card(
         children=[
             dbc.CardBody(
@@ -163,10 +176,7 @@ def _create_input_card(
                         html_for=input_component.id,
                     ),
                     input_component,
-                    dbc.FormText(
-                        children=form_text,
-                        color="secondary",
-                    ),
+                    dbc.FormText(children=form_text, color="secondary"),
                 ]
             )
         ],
@@ -177,9 +187,9 @@ def _create_input_card(
 def _create_axis_dropdown(
     label: str, component_id: str, default_value: str
 ) -> dbc.Col:
-    """Create a dropdown for scatter plot axis selection."""
+    """Helper for plot axis selection dropdowns."""
     return dbc.Col(
-        [
+        children=[
             dbc.Label(label),
             dcc.Dropdown(
                 id=component_id,
@@ -196,18 +206,22 @@ def _create_axis_dropdown(
 
 
 def create_layout() -> dbc.Container:
-    """Create the layout structure component."""
+    """
+    Assembles the complete dashboard layout.
+
+    Structured into a sidebar for data input and a main area for results,
+    visualizations, and historical data.
+    """
     return dbc.Container(
         children=[
             dcc.Store(id="latest_prediction_store"),
             dbc.Row(
-                [
-                    # Left side: input
+                children=[
+                    # --- SIDEBAR: USER INPUT ---
                     dbc.Col(
                         width=3,
                         children=[
-                            html.H4("Input Data", className="mb-3"),
-                            # 1. Input: Island
+                            html.H4(children="Input Data", className="mb-3"),
                             _create_input_card(
                                 label="island",
                                 input_component=_create_select(
@@ -216,21 +230,18 @@ def create_layout() -> dbc.Container:
                                     required=True,
                                 ),
                             ),
-                            # 2. Input: Bill length
                             _create_input_card(
                                 label="bill_length_mm",
                                 input_component=_create_input(
                                     label="bill_length_mm", input_type="number"
                                 ),
                             ),
-                            # 3. Input: Bill depth
                             _create_input_card(
                                 label="bill_depth_mm",
                                 input_component=_create_input(
                                     label="bill_depth_mm", input_type="number"
                                 ),
                             ),
-                            # 4. Input: Flipper Length
                             _create_input_card(
                                 label="flipper_length_mm",
                                 input_component=_create_input(
@@ -238,46 +249,37 @@ def create_layout() -> dbc.Container:
                                     input_type="number",
                                 ),
                             ),
-                            # 5. Input: Body Mass
                             _create_input_card(
                                 label="body_mass_g",
                                 input_component=_create_input(
-                                    label="body_mass_g",
-                                    input_type="number",
+                                    label="body_mass_g", input_type="number"
                                 ),
                             ),
-                            # 5. Input: Sex
                             _create_input_card(
                                 label="sex",
                                 input_component=_create_select(
-                                    label="sex",
-                                    options=SEX_OPTIONS,
+                                    label="sex", options=SEX_OPTIONS
                                 ),
                             ),
                             dbc.Card(
-                                children=[
-                                    dbc.CardBody(
-                                        children=[
-                                            dbc.Button(
-                                                children="Classify",
-                                                id="classify_button",
-                                                color="primary",
-                                                className="w-100",
-                                                size="lg",
-                                            ),
-                                        ]
+                                dbc.CardBody(
+                                    dbc.Button(
+                                        children="Classify Penguin",
+                                        id="classify_button",
+                                        color="primary",
+                                        className="w-100",
+                                        size="lg",
                                     )
-                                ],
+                                ),
                                 className="shadow-sm border-0",
                             ),
                         ],
                     ),
-                    # Right side: Output
+                    # --- MAIN CONTENT: RESULTS & ANALYSIS ---
                     dbc.Col(
                         width=9,
-                        lg=9,
                         children=[
-                            # Output classification and score.
+                            # Section: Classification Output
                             dbc.Row(
                                 [
                                     dbc.Col(
@@ -287,24 +289,19 @@ def create_layout() -> dbc.Container:
                                                 className="mb-3",
                                             ),
                                             dbc.Card(
-                                                children=[
+                                                [
                                                     dbc.CardHeader(
-                                                        children="Classification Result",
+                                                        children="Result",
                                                         className="fw-bold",
                                                     ),
                                                     dbc.CardBody(
                                                         dbc.Alert(
-                                                            children="",
                                                             id="classification_result",
                                                             is_open=False,
                                                             dismissable=True,
-                                                            fade=True,
                                                             color="info",
                                                             className="text-center fw-bold m-0",
-                                                            style={
-                                                                "marginTop": "10px"
-                                                            },
-                                                        ),
+                                                        )
                                                     ),
                                                 ]
                                             ),
@@ -313,42 +310,38 @@ def create_layout() -> dbc.Container:
                                 ]
                             ),
                             html.Br(),
-                            # Output Scatterplot and Table
+                            # Section: Visualizations & Table
                             dbc.Row(
-                                [
-                                    # Scatterplot
+                                children=[
+                                    # Column: Interactive Scatter Plot
                                     dbc.Col(
                                         width=6,
-                                        xl=6,
                                         children=[
                                             dbc.Card(
                                                 children=[
                                                     dbc.CardHeader(
-                                                        children="Penguin Data Analysis",
+                                                        children="Population Analysis",
                                                         className="fw-bold",
                                                     ),
                                                     dbc.CardBody(
-                                                        [
+                                                        children=[
                                                             dcc.Graph(
                                                                 id="scatter_graph",
-                                                                figure={},
-                                                                responsive=True,
                                                                 style={
-                                                                    "height": "450px",
+                                                                    "height": "450px"
                                                                 },
                                                             ),
-                                                            # Add dropdowns for scatter plot customization
                                                             dbc.Row(
-                                                                [
+                                                                children=[
                                                                     _create_axis_dropdown(
-                                                                        "Y-Axis",
-                                                                        "scatter_y_axis",
-                                                                        "bill_length_mm",
+                                                                        label="Y-Axis",
+                                                                        component_id="scatter_y_axis",
+                                                                        default_value="bill_length_mm",
                                                                     ),
                                                                     _create_axis_dropdown(
-                                                                        "X-Axis",
-                                                                        "scatter_x_axis",
-                                                                        "flipper_length_mm",
+                                                                        label="X-Axis",
+                                                                        component_id="scatter_x_axis",
+                                                                        default_value="flipper_length_mm",
                                                                     ),
                                                                 ],
                                                                 className="mt-3",
@@ -357,19 +350,18 @@ def create_layout() -> dbc.Container:
                                                         className="p-1",
                                                     ),
                                                 ],
-                                                outline=True,
                                                 className="shadow-sm border-1 h-100",
-                                            ),
+                                            )
                                         ],
                                     ),
-                                    # Table
+                                    # Column: Prediction History
                                     dbc.Col(
                                         width=6,
                                         children=[
                                             dbc.Card(
-                                                [
+                                                children=[
                                                     dbc.CardHeader(
-                                                        children="History",
+                                                        children="Prediction History",
                                                         className="fw-bold",
                                                     ),
                                                     dbc.CardBody(
@@ -390,13 +382,14 @@ def create_layout() -> dbc.Container:
                                 className="g-3",
                             ),
                             html.Br(),
+                            # Section: Global Model Performance
                             dbc.Row(
                                 [
                                     dbc.Col(
                                         width=12,
                                         children=[_create_performance_card()],
                                     )
-                                ],
+                                ]
                             ),
                         ],
                     ),

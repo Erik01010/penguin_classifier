@@ -1,3 +1,7 @@
+"""
+Logic for loading the trained model and performing predictions.
+"""
+
 import joblib
 import numpy as np
 import pandas as pd
@@ -7,21 +11,44 @@ from src.penguin_classifier.config import MODEL_PATH
 
 
 def _load_pipeline(path: str) -> Pipeline:
-    """Load trained model pipeline from disk."""
+    """
+    Loads a trained scikit-learn pipeline from a joblib file.
+
+    Args:
+        path (str): File path to the saved pipeline.
+
+    Returns:
+        Pipeline: The loaded scikit-learn Pipeline object.
+    """
     return joblib.load(path)
 
 
 def predict_batch_species(
     features: pd.DataFrame, pipeline: Pipeline
 ) -> list[str]:
-    """Predicts the species for multiple observations."""
+    """
+    Predicts species for a collection of penguin observations.
 
+    Args:
+        features (pd.DataFrame): Input features for multiple penguins.
+        pipeline (Pipeline): The trained model pipeline to use.
+
+    Returns:
+        list[str]: Predicted species names for each observation.
+    """
     return pipeline.predict(X=features)
 
 
 def predict_single_penguin_proba(features: pd.DataFrame) -> tuple[str, float]:
-    """Predicts species and confidence for a single penguin observation."""
+    """
+    Predicts species and confidence score for a single penguin.
 
+    Args:
+        features (pd.DataFrame): A single-row DataFrame with penguin features.
+
+    Returns:
+        tuple[str, float]: Predicted species name and the highest probability score.
+    """
     pipeline = _load_pipeline(MODEL_PATH)
     predicted_species = pipeline.predict(X=features)[0]
 

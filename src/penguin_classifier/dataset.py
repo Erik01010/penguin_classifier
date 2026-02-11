@@ -1,9 +1,13 @@
-from pathlib import Path
+"""
+Utility functions for data ingestion, cleaning, and persistence.
+Handles both the initial dataset and the history of user predictions.
+"""
 
+from pathlib import Path
 from loguru import logger
 import pandas as pd
 
-from penguin_classifier.config import (
+from src.penguin_classifier.config import (
     CSV_HEADER,
     NUMERICAL_FEATURES,
     PROCESSED_DATA_PATH,
@@ -12,7 +16,11 @@ from penguin_classifier.config import (
 
 
 def fetch_and_save_raw_data() -> None:
-    """Fetches the raw penguins dataset and saves it to RAW_DATA_PATH."""
+    """
+    Downloads the palmerpenguins dataset if it doesn't exist locally.
+
+    Saves the data as a CSV to the path defined in the configuration.
+    """
     if RAW_DATA_PATH.exists():
         logger.info(
             f"Raw data already exists at {RAW_DATA_PATH}, skipping fetch."
@@ -29,7 +37,18 @@ def fetch_and_save_raw_data() -> None:
 
 
 def load_data(filepath: Path) -> pd.DataFrame:
-    """Loads data from a CSV file into a pandas DataFrame."""
+    """
+    Reads a CSV file into a DataFrame.
+
+    Args:
+        filepath (Path): Path to the target CSV file.
+
+    Returns:
+        pd.DataFrame: The loaded dataset.
+
+    Raises:
+        FileNotFoundError: If the file does not exist at the specified path.
+    """
     try:
         data = pd.read_csv(filepath)
         return data
@@ -38,7 +57,15 @@ def load_data(filepath: Path) -> pd.DataFrame:
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Cleans the penguins dataset by handling missing values."""
+    """
+    Basic preprocessing to handle missing values and drop unnecessary columns.
+
+    Args:
+        df (pd.DataFrame): The raw input DataFrame.
+
+    Returns:
+        pd.DataFrame: Cleaned data ready for visualization or splitting.
+    """
     df = df.dropna(subset=NUMERICAL_FEATURES + ["species"], axis="rows")
     return df.drop(
         columns=["year"],
@@ -46,7 +73,15 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def split_feature_from_target(df: pd.DataFrame) -> tuple[pd.DataFrame, list]:
-    """Splits a dataset into features and target."""
+    """
+    Separates the target labels from the input features.
+
+    Args:
+        df (pd.DataFrame): Cleaned dataset.
+
+    Returns:
+        tuple[pd.DataFrame, list]: Features (X) and Target labels (y).
+    """
     target = df["species"]
     features = df.drop("species", axis=1)
     logger.success("Data split into features and target.")
@@ -54,9 +89,15 @@ def split_feature_from_target(df: pd.DataFrame) -> tuple[pd.DataFrame, list]:
 
 
 def save_prediction(new_data: pd.DataFrame = None):
-    """Appends new data to the CSV file."""
+    """
+    Appends a new prediction record to the processed history CSV.
+
+    Args:
+        new_data (pd.DataFrame): A single-row DataFrame containing the features and the predicted species.
+    """
     file_exists = Path(PROCESSED_DATA_PATH).exists()
 
+    # Ensure columns are in the correct order before saving
     new_data_ordered = new_data[CSV_HEADER]
     new_data_ordered.to_csv(
         PROCESSED_DATA_PATH, mode="a", header=not file_exists, index=False
@@ -64,9 +105,18 @@ def save_prediction(new_data: pd.DataFrame = None):
 
 
 def load_combined_data():
-    """Loads datasets and concatenates if history is not empty."""
+    """
+    Merges historical raw data with user-generated prediction history.
+
+    Used for updating the UI dashboard to show both original data
+    points and new predictions in the plots and tables.
+
+    Returns:
+        pd.DataFrame: Concatenated dataset, reversed for chronological display.
+    """
     raw_data = load_data(RAW_DATA_PATH)
     cleaned_data = clean_data(raw_data)
+
     if not PROCESSED_DATA_PATH.exists():
         return cleaned_data.iloc[::-1]
 
@@ -78,7 +128,3 @@ def load_combined_data():
         return updated_data.iloc[::-1]
 
     return cleaned_data.iloc[::-1]
-
-
-if __name__ == "__main__":
-    pass

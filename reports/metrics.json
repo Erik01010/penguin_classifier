@@ -30,5 +30,5 @@
         "f1-score": 1.0,
         "support": 69.0
     },
-    "cross_val_accuracy": 0.99
+    "cross_val_accuracy": 0.9927
 }
